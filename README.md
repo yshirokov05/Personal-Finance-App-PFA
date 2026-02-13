@@ -26,11 +26,30 @@
 
   ## 🛠️ Tech Stack
   - **Frontend**: React
-  - **Backend**: Firebase (Authentication, Firestore Database, Hosting)
+  - **Backend**: Firebase (Authentication, Firestore Database, Hosting), Python (SQLAlchemy, yfinance)
   - **State Management**: React Context API / Redux (TBD)
   - **UI Framework**: Material-UI / Tailwind CSS (TBD)
 
-  ##  Project Status
+  ## Backend Services
+
+### Prerequisites
+- Python 3.8+
+- pip
+
+### Installation
+```bash
+pip install -r requirements.txt
+```
+
+### Usage
+The backend services are currently designed as modules to be integrated into a larger application.
+- `backend/models.py`: Defines the database schema for User, Income, and Asset.
+- `backend/price_service.py`: Provides functions to fetch real-time stock prices.
+- `backend/calculations.py`: Contains logic to calculate net worth and estimated tax liability.
+
+To use these services, you would typically import them into your main backend application (e.g., a Flask or Django app) and interact with them via a database session. Example usage snippets are provided within each Python file.
+
+  ## Project Status
   - [x] Project initialization
   - [ ] Firebase configuration
   - [ ] Authentication setup
