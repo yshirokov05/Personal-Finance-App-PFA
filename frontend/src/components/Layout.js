@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Wallet, CreditCard, PiggyBank, Settings } from 'lucide-react';
+import { LayoutDashboard, Wallet, CreditCard, PiggyBank, Settings, DollarSign } from 'lucide-react';
 
 const Layout = ({ children, activeView, setActiveView }) => {
     const navItems = [
@@ -7,6 +7,7 @@ const Layout = ({ children, activeView, setActiveView }) => {
         { id: 'income', label: 'Income', icon: <Wallet size={20} /> },
         { id: 'investments', label: 'Investments', icon: <PiggyBank size={20} /> },
         { id: 'debts', label: 'Debts', icon: <CreditCard size={20} /> },
+        { id: 'taxes', label: 'Taxes', icon: <DollarSign size={20} /> },
         { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
     ];
 
@@ -15,7 +16,7 @@ const Layout = ({ children, activeView, setActiveView }) => {
             {/* Sidebar */}
             <div className="w-64 bg-gray-900 text-white flex-shrink-0">
                 <div className="p-6 text-2xl font-bold tracking-tight text-blue-400">
-                    MyFinance
+                    PFA
                 </div>
                 <nav className="mt-6 px-4 space-y-2">
                     {navItems.map((item) => (

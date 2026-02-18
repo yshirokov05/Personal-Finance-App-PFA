@@ -2,61 +2,156 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Dashboard from './components/Dashboard';
 import EditPortfolio from './components/EditPortfolio';
+import TaxCalculator from './components/TaxCalculator';
 import axios from 'axios';
 import Layout from './components/Layout';
 import Modal from './components/Modal';
+import Login from './components/Login';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-function App() {
+export class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8 text-center">
+          <h1 className="text-2xl font-bold text-red-600">Something went wrong.</h1>
+          <p className="text-gray-600 mt-2">{this.state.error?.message}</p>
+          <button 
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={() => window.location.reload()}
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function MainContent() {
+  const { currentUser, logout } = useAuth();
   const [activeView, setActiveView] = useState('dashboard');
   const [netWorth, setNetWorth] = useState(0);
   const [assets, setAssets] = useState([]);
   const [incomes, setIncomes] = useState([]);
   const [debts, setDebts] = useState([]);
-  const [taxLiability, setTaxLiability] = useState(0);
+  const [taxLiability, setTaxLiability] = useState({ 
+    total: 0, 
+    federal: 0, 
+    state: 0,
+    fica: 0
+  });
+  const [userTaxInfo, setUserTaxInfo] = useState({ filing_status: 'SINGLE', state: 'CA' });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTab, setModalTab] = useState('income');
 
-  const fetchData = () => {
-    axios.get('/api/net_worth')
-        .then(response => {
-            setAssets(response.data.assets);
-            setIncomes(response.data.incomes);
-            setDebts(response.data.debts);
-            setNetWorth(response.data.real_time_net_worth);
-            setTaxLiability(response.data.estimated_tax_liability);
-            setLoading(false);
-        })
-        .catch(error => {
-            setError(error.message);
-            setLoading(false);
-        });
+  const getHeaders = async () => {
+    const token = await currentUser.getIdToken();
+    return {
+      headers: { Authorization: `Bearer ${token}` }
+    };
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleSave = (portfolioData) => {
-    setLoading(true);
-    axios.put('/api/portfolio', portfolioData)
-      .then(response => {
+  const fetchData = async () => {
+    try {
+        const headers = await getHeaders();
+        const response = await axios.get('/api/net_worth', headers);
         setAssets(response.data.assets);
         setIncomes(response.data.incomes);
         setDebts(response.data.debts);
         setNetWorth(response.data.real_time_net_worth);
-        setTaxLiability(response.data.estimated_tax_liability);
+        setTaxLiability({
+            total: response.data.estimated_tax_liability,
+            federal: response.data.estimated_federal_tax,
+            state: response.data.estimated_state_tax,
+            fica: response.data.estimated_fica_tax
+        });
+        setUserTaxInfo({
+            filing_status: response.data.filing_status,
+            state: response.data.state
+        });
+        setLoading(false);
+    } catch (error) {
+        setError(error.message);
+        setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [currentUser]);
+
+  const handleSave = async (portfolioData) => {
+    setLoading(true);
+    try {
+        const headers = await getHeaders();
+        const response = await axios.put('/api/portfolio', portfolioData, headers);
+        setAssets(response.data.assets);
+        setIncomes(response.data.incomes);
+        setDebts(response.data.debts);
+        setNetWorth(response.data.real_time_net_worth);
+        setTaxLiability({
+          total: response.data.estimated_tax_liability,
+          federal: response.data.estimated_federal_tax,
+          state: response.data.estimated_state_tax,
+          fica: response.data.estimated_fica_tax
+        });
+        setUserTaxInfo({
+            filing_status: response.data.filing_status,
+            state: response.data.state
+        });
         setIsModalOpen(false);
         setLoading(false);
         setError(null);
-      })
-      .catch(error => {
+    } catch (error) {
         const msg = error.response?.data?.error || error.message;
-        alert(msg); // Alert user of validation failure
+        alert(msg);
         setError(msg);
         setLoading(false);
-      });
+    }
+  };
+
+  const handleSaveTaxInfo = async (taxData) => {
+    setLoading(true);
+    try {
+        const headers = await getHeaders();
+        const response = await axios.put('/api/user_tax_info', taxData, headers);
+        setNetWorth(response.data.real_time_net_worth);
+        setTaxLiability({
+          total: response.data.estimated_tax_liability,
+          federal: response.data.estimated_federal_tax,
+          state: response.data.estimated_state_tax,
+          fica: response.data.estimated_fica_tax
+        });
+        setUserTaxInfo({
+            filing_status: response.data.filing_status,
+            state: response.data.state
+        });
+        setLoading(false);
+        setError(null);
+    } catch (error) {
+        const msg = error.response?.data?.error || error.message;
+        alert(msg);
+        setError(msg);
+        setLoading(false);
+    }
   };
 
   const openEditModal = (tab = 'income') => {
@@ -66,10 +161,6 @@ function App() {
 
   if (loading && !isModalOpen) {
     return <Layout activeView={activeView} setActiveView={setActiveView}><div>Loading...</div></Layout>;
-  }
-
-  if (error) {
-      return <Layout activeView={activeView} setActiveView={setActiveView}><div>Error: {error}</div></Layout>;
   }
 
   const renderContent = () => {
@@ -85,7 +176,6 @@ function App() {
                   <p className="text-gray-600">Total Annual Gross Income: <span className="font-bold text-green-600">${incomes.reduce((acc, inc) => acc + inc.amount, 0).toLocaleString()}</span></p>
                   <button onClick={() => openEditModal('income')} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Update Income</button>
                </div>
-               {/* Display income details... */}
             </div>
           </div>
         );
@@ -108,13 +198,44 @@ function App() {
             <h2 className="text-3xl font-bold text-gray-800">Debts & Liabilities</h2>
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                <div className="flex justify-between items-center mb-6">
-                  <p className="text-gray-600">Total Debt Balance: <span className="font-bold text-red-600">${debts.reduce((acc, d) => acc + d.amount, 0).toLocaleString()}</span></p>
+                  <p className="text-gray-600">Total Debt Balance: <span className="font-bold text-red-600">${debts.reduce((acc, d) => acc + d.remaining_balance, 0).toLocaleString()}</span></p>
                   <button onClick={() => openEditModal('debts')} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Manage Debts</button>
                </div>
-               {/* Display debt details... */}
+               <Dashboard debts={debts} assets={[]} netWorth={0} hideSummary hideAssetSections={true} showDebtAllocation={true} />
             </div>
           </div>
         );
+      case 'taxes':
+        const totalAnnualIncome = incomes.reduce((acc, inc) => acc + inc.amount, 0);
+        return (
+            <div className="space-y-6">
+                <h2 className="text-3xl font-bold text-gray-800">Tax Estimation</h2>
+                <TaxCalculator 
+                    initialFilingStatus={userTaxInfo.filing_status}
+                    initialState={userTaxInfo.state}
+                    onSave={handleSaveTaxInfo}
+                    estimatedFederalTax={taxLiability.federal}
+                    estimatedStateTax={taxLiability.state}
+                    estimatedFicaTax={taxLiability.fica}
+                    totalIncome={totalAnnualIncome}
+                />
+            </div>
+        );
+      case 'settings':
+          return (
+              <div className="space-y-6">
+                  <h2 className="text-3xl font-bold text-gray-800">Settings</h2>
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                      <p className="mb-4">Logged in as: <strong>{currentUser.email}</strong></p>
+                      <button 
+                        onClick={() => logout()}
+                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                      >
+                        Sign Out
+                      </button>
+                  </div>
+              </div>
+          )
       default:
         return <div>Coming Soon...</div>;
     }
@@ -130,4 +251,20 @@ function App() {
   );
 }
 
-export default App;
+function App() {
+    const { currentUser } = useAuth();
+
+    return (
+        <ErrorBoundary>
+            {currentUser ? <MainContent /> : <Login />}
+        </ErrorBoundary>
+    );
+}
+
+export default function Root() {
+    return (
+        <AuthProvider>
+            <App />
+        </AuthProvider>
+    );
+}

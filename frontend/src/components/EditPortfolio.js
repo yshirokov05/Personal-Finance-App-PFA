@@ -196,6 +196,9 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                                 <option value="BOND">Bond</option>
                                                 <option value="CASH">Cash</option>
                                                 <option value="HOUSING">Housing</option>
+                                                <option value="SAVINGS">Savings</option>
+                                                <option value="CHECKING">Checking</option>
+                                                <option value="HIGH_YIELD_SAVINGS">High Yield Savings</option>
                                             </select>
                                         </div>
                                         <div>
@@ -205,12 +208,12 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                                 placeholder={asset.asset_type === 'HOUSING' ? 'Primary Residence' : 'e.g. AAPL'}
                                                 value={asset.ticker}
                                                 onChange={(e) => handleAssetChange(index, 'ticker', e.target.value.toUpperCase())}
-                                                disabled={asset.asset_type === 'CASH'}
-                                                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${asset.asset_type === 'CASH' ? 'bg-gray-100 cursor-not-allowed border-gray-200' : 'bg-white border-gray-300'}`}
+                                                disabled={['CASH', 'SAVINGS', 'CHECKING', 'HIGH_YIELD_SAVINGS'].includes(asset.asset_type)}
+                                                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${['CASH', 'SAVINGS', 'CHECKING', 'HIGH_YIELD_SAVINGS'].includes(asset.asset_type) ? 'bg-gray-100 cursor-not-allowed border-gray-200' : 'bg-white border-gray-300'}`}
                                             />
                                         </div>
                                     </div>
-                                    {asset.asset_type !== 'CASH' && asset.asset_type !== 'HOUSING' && (
+                                    {asset.asset_type !== 'CASH' && asset.asset_type !== 'HOUSING' && asset.asset_type !== 'SAVINGS' && asset.asset_type !== 'CHECKING' && asset.asset_type !== 'HIGH_YIELD_SAVINGS' && (
                                         <div className="grid grid-cols-3 gap-4">
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-500">Shares</label>
@@ -243,9 +246,9 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                             </div>
                                         </div>
                                     )}
-                                    {(asset.asset_type === 'CASH' || asset.asset_type === 'HOUSING') && (
+                                    {(asset.asset_type === 'CASH' || asset.asset_type === 'HOUSING' || asset.asset_type === 'SAVINGS' || asset.asset_type === 'CHECKING' || asset.asset_type === 'HIGH_YIELD_SAVINGS') && (
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-500">{asset.asset_type === 'CASH' ? 'Cash Amount' : 'Market Value'}</label>
+                                            <label className="block text-xs font-medium text-gray-500">{['CASH', 'SAVINGS', 'CHECKING', 'HIGH_YIELD_SAVINGS'].includes(asset.asset_type) ? 'Cash Amount' : 'Market Value'}</label>
                                             <input
                                                 type="number"
                                                 min="0"

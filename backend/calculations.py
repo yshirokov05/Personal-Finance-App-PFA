@@ -1,6 +1,6 @@
-from .price_service import get_current_price
-from .tax_logic import calculate_federal_tax, calculate_state_tax
-from .models import User, Income, Asset, Debt, AssetType
+from price_service import get_current_price
+from tax_logic import calculate_federal_tax, calculate_state_tax, calculate_fica_tax
+from models import User, Income, Asset, Debt, AssetType
 
 def calculate_net_worth(user: User, incomes: list[Income], assets: list[Asset], debts: list[Debt]):
     """
@@ -9,7 +9,7 @@ def calculate_net_worth(user: User, incomes: list[Income], assets: list[Asset], 
     """
     total_assets_market_value = 0
     for asset in assets:
-        if asset.asset_type in [AssetType.CASH, AssetType.HOUSING]:
+        if asset.asset_type in [AssetType.CASH, AssetType.HOUSING, AssetType.SAVINGS, AssetType.CHECKING, AssetType.HIGH_YIELD_SAVINGS]:
             # For Cash and Housing, 'shares' stores the actual market value/amount
             total_assets_market_value += asset.shares
         else:
@@ -27,7 +27,8 @@ def calculate_net_worth(user: User, incomes: list[Income], assets: list[Asset], 
     # Estimate tax liability (informative, not subtracted from net worth)
     estimated_federal_tax = calculate_federal_tax(total_income, user.filing_status.value)
     estimated_state_tax = calculate_state_tax(total_income, user.state.name, user.filing_status.value) 
-    estimated_tax_liability = estimated_federal_tax + estimated_state_tax
+    estimated_fica_tax = calculate_fica_tax(total_income, user.filing_status.value)
+    estimated_tax_liability = estimated_federal_tax + estimated_state_tax + estimated_fica_tax
 
     real_time_net_worth = total_assets_market_value - total_debts
 
@@ -37,6 +38,7 @@ def calculate_net_worth(user: User, incomes: list[Income], assets: list[Asset], 
         "total_income": total_income,
         "estimated_federal_tax": estimated_federal_tax,
         "estimated_state_tax": estimated_state_tax,
+        "estimated_fica_tax": estimated_fica_tax,
         "estimated_tax_liability": estimated_tax_liability,
         "real_time_net_worth": real_time_net_worth
     }

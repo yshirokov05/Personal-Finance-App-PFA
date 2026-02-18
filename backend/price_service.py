@@ -1,10 +1,10 @@
-import yfinance as yf
-
 def get_current_price(ticker_symbol):
     """
     Fetches the current market price for a given ticker symbol using yfinance.
     Returns None if ticker is invalid or data cannot be fetched.
     """
+    import yfinance as yf
+    
     if not ticker_symbol or ticker_symbol == 'CASH':
         return 1.0
 

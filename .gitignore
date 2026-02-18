@@ -1,8 +1,21 @@
-2node_modules
+node_modules/
+dist/
+build/
+*.log
+*_log.txt
+.env
+.env.local
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
 # Python
 __pycache__/
 *.pyc
-.env
 .venv/
 venv/
-
+.pytest_cache/
+*.swp
+.DS_Store

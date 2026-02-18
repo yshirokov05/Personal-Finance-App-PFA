@@ -1,26 +1,16 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from .price_service import get_current_price
-from .calculations import calculate_net_worth
-from .models import User, Income, Asset, FilingStatus, USState, IncomeType, Debt, AssetType
+from price_service import get_current_price, validate_ticker
+from calculations import calculate_net_worth
+from models import User, Income, Asset, FilingStatus, USState, IncomeType, Debt, AssetType
+from firestore_db import get_user_data, save_user_data
+from auth import token_required
 
 app = Flask(__name__)
 CORS(app)
 
-# In-memory data store
-user = User(filing_status=FilingStatus.SINGLE, state=USState.CA)
-incomes = [Income(income_type=IncomeType.SALARY, amount=120000, monthly_income=10000)]
-assets = [
-    Asset(ticker='QQQ', shares=100, cost_basis=30000, asset_type=AssetType.STOCK),
-    Asset(ticker='NVDA', shares=50, cost_basis=10000, asset_type=AssetType.STOCK),
-    Asset(ticker='CASH', shares=25000, cost_basis=1, asset_type=AssetType.CASH)
-]
-debts = [
-    Debt(name='Student Loan', initial_amount=30000, amount_paid=10000, monthly_payment=500, interest_rate=0.05)
-]
-
 def asset_to_dict(asset):
-    current_price = get_current_price(asset.ticker) if asset.asset_type not in [AssetType.CASH, AssetType.HOUSING] else 1.0
+    current_price = get_current_price(asset.ticker) if asset.asset_type not in [AssetType.CASH, AssetType.HOUSING, AssetType.SAVINGS, AssetType.CHECKING, AssetType.HIGH_YIELD_SAVINGS] else 1.0
     return {
         'ticker': asset.ticker,
         'shares': asset.shares,
@@ -49,20 +39,24 @@ def debt_to_dict(debt):
     }
 
 @app.route('/api/net_worth', methods=['GET'])
+@token_required
 def get_net_worth():
     """Calculates and returns the current net worth."""
+    user, incomes, assets, debts = get_user_data(user_id=request.uid)
     net_worth_data = calculate_net_worth(user, incomes, assets, debts)
     net_worth_data['assets'] = [asset_to_dict(a) for a in assets]
     net_worth_data['incomes'] = [income_to_dict(i) for i in incomes]
     net_worth_data['debts'] = [debt_to_dict(d) for d in debts]
+    net_worth_data['filing_status'] = user.filing_status.name
+    net_worth_data['state'] = user.state.name
     return jsonify(net_worth_data)
 
-from .price_service import get_current_price, validate_ticker
-
 @app.route('/api/portfolio', methods=['PUT'])
+@token_required
 def update_portfolio():
     """Updates the portfolio with validation for tickers and numbers."""
     data = request.get_json()
+    user, incomes, assets, debts = get_user_data(user_id=request.uid)
 
     # Update assets
     new_assets_data = data.get('assets', [])
@@ -82,13 +76,13 @@ def update_portfolio():
                  return jsonify({'error': "Ticker is required for stocks and bonds."}), 400
             if not validate_ticker(ticker):
                  return jsonify({'error': f"Invalid ticker: {ticker}. Please enter a real market symbol."}), 400
-        elif asset_type == AssetType.CASH:
-            ticker = 'CASH'
+        elif asset_type in [AssetType.CASH, AssetType.SAVINGS, AssetType.CHECKING, AssetType.HIGH_YIELD_SAVINGS]:
+            ticker = asset_type.name
             cost_basis = 1.0
         elif asset_type == AssetType.HOUSING:
             if not ticker:
                 ticker = 'PRIMARY RESIDENCE'
-            cost_basis = shares # For housing, we treat initial value as cost basis
+            cost_basis = shares 
 
         temp_assets.append(
             Asset(
@@ -99,13 +93,11 @@ def update_portfolio():
             )
         )
     
-    # If all valid, update the real store
-    assets.clear()
-    assets.extend(temp_assets)
+    assets = temp_assets
 
-    # Update incomes (basic validation)
+    # Update incomes
     new_incomes_data = data.get('incomes', [])
-    incomes.clear()
+    incomes = []
     for income_data in new_incomes_data:
         income_type = IncomeType[income_data['income_type']]
         amount = 0
@@ -125,7 +117,7 @@ def update_portfolio():
 
     # Update debts
     new_debts_data = data.get('debts', [])
-    debts.clear()
+    debts = []
     for debt_data in new_debts_data:
         initial = float(debt_data.get('initial_amount', 0))
         paid = float(debt_data.get('amount_paid', 0))
@@ -142,10 +134,45 @@ def update_portfolio():
             )
         )
 
+    # Save to Firestore
+    save_user_data(user, incomes, assets, debts, user_id=request.uid)
+
     net_worth_data = calculate_net_worth(user, incomes, assets, debts)
     net_worth_data['assets'] = [asset_to_dict(a) for a in assets]
     net_worth_data['incomes'] = [income_to_dict(i) for i in incomes]
     net_worth_data['debts'] = [debt_to_dict(d) for d in debts]
+    return jsonify(net_worth_data)
+
+@app.route('/api/user_tax_info', methods=['PUT'])
+@token_required
+def update_user_tax_info():
+    data = request.get_json()
+    user, incomes, assets, debts = get_user_data(user_id=request.uid)
+    
+    new_filing_status_str = data.get('filing_status')
+    new_state_str = data.get('state')
+
+    if new_filing_status_str:
+        try:
+            user.filing_status = FilingStatus[new_filing_status_str]
+        except KeyError:
+            return jsonify({'error': f"Invalid filing status: {new_filing_status_str}"}), 400
+    
+    if new_state_str:
+        try:
+            user.state = USState[new_state_str]
+        except KeyError:
+            return jsonify({'error': f"Invalid state: {new_state_str}"}), 400
+    
+    # Save to Firestore
+    save_user_data(user, incomes, assets, debts, user_id=request.uid)
+
+    net_worth_data = calculate_net_worth(user, incomes, assets, debts)
+    net_worth_data['assets'] = [asset_to_dict(a) for a in assets]
+    net_worth_data['incomes'] = [income_to_dict(i) for i in incomes]
+    net_worth_data['debts'] = [debt_to_dict(d) for d in debts]
+    net_worth_data['filing_status'] = user.filing_status.name
+    net_worth_data['state'] = user.state.name
     return jsonify(net_worth_data)
 
 if __name__ == '__main__':

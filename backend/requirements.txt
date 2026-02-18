@@ -1,4 +1,6 @@
 yfinance
 SQLAlchemy
 Flask
-Flask-Cors
+flask-cors
+firebase-functions
+firebase-admin
