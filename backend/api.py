@@ -23,9 +23,15 @@ def asset_to_dict(asset):
     }
 
 def income_to_dict(income):
+    # This needs to be improved to return all relevant fields
+    # for now, just return what is needed for net_worth calculation
     return {
         'income_type': income.income_type.name,
-        'amount': income.amount
+        'amount': income.amount,
+        # Add other fields here as needed by the frontend
+        'monthly_income': income.monthly_income if hasattr(income, 'monthly_income') else None,
+        'hourly_wage': income.hourly_wage if hasattr(income, 'hourly_wage') else None,
+        'hours_worked': income.hours_worked if hasattr(income, 'hours_worked') else None,
     }
 
 @app.route('/api/net_worth', methods=['GET'])
@@ -41,16 +47,41 @@ def update_portfolio():
     """Updates the portfolio based on new share and income data."""
     data = request.get_json()
 
-    # Update annual income
-    # This assumes a single salary income for simplicity
-    incomes[0].amount = data.get('annualIncome', incomes[0].amount)
+    # Update assets
+    new_assets_data = data.get('assets', [])
+    assets.clear()
+    for asset_data in new_assets_data:
+        cost_basis = asset_data.get('cost_basis') if asset_data.get('ticker') != 'CASH' else 1.0
+        assets.append(
+            Asset(
+                ticker=asset_data['ticker'],
+                shares=asset_data['shares'],
+                cost_basis=cost_basis
+            )
+        )
 
-    # Update asset shares
-    for asset in assets:
-        if asset.ticker == 'QQQ':
-            asset.shares = data.get('qqqShares', asset.shares)
-        elif asset.ticker == 'NVDA':
-            asset.shares = data.get('nvdaShares', asset.shares)
+    # Update incomes
+    new_incomes_data = data.get('incomes', [])
+    incomes.clear()
+    for income_data in new_incomes_data:
+        income_type = IncomeType[income_data['income_type']]
+        amount = 0
+        
+        income = Income(income_type=income_type)
+
+        if income_type == IncomeType.SALARY:
+            monthly_income = income_data.get('monthly_income', 0)
+            amount = monthly_income * 12
+            income.monthly_income = monthly_income
+        elif income_type == IncomeType.HOURLY:
+            hourly_wage = income_data.get('hourly_wage', 0)
+            hours_worked = income_data.get('hours_worked', 0)
+            amount = hourly_wage * hours_worked * 52
+            income.hourly_wage = hourly_wage
+            income.hours_worked = hours_worked
+
+        income.amount = amount
+        incomes.append(income)
 
     # Recalculate net worth with updated data
     net_worth_data = calculate_net_worth(user, incomes, assets)
