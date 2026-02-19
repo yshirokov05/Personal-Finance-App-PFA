@@ -63,17 +63,17 @@ function MainContent({ isGuest }) {
   const [modalTab, setModalTab] = useState('income');
 
   const fetchData = async () => {
-    if (isGuest) {
-        setLoading(false);
-        return;
-    }
-    if (!currentUser) return;
+    // Both guest and authenticated users can fetch data
     try {
-        const token = await currentUser.getIdToken(true); // Force refresh token
-        const headers = {
-          headers: { Authorization: `Bearer ${token}` }
-        };
-        console.log("Fetching data with token...");
+        let headers = {};
+        if (!isGuest && currentUser) {
+            const token = await currentUser.getIdToken(true);
+            headers = {
+              headers: { Authorization: `Bearer ${token}` }
+            };
+        }
+        
+        console.log("Fetching data...");
         const response = await axios.get('/api/net_worth', headers);
         setAssets(response.data.assets);
         setIncomes(response.data.incomes);
@@ -98,16 +98,18 @@ function MainContent({ isGuest }) {
 
   useEffect(() => {
     fetchData();
-  }, [currentUser]);
+  }, [currentUser, isGuest]);
 
   const handleSave = async (portfolioData) => {
-    if (!currentUser) return;
     setLoading(true);
     try {
-        const token = await currentUser.getIdToken(true);
-        const headers = {
-          headers: { Authorization: `Bearer ${token}` }
-        };
+        let headers = {};
+        if (!isGuest && currentUser) {
+            const token = await currentUser.getIdToken(true);
+            headers = {
+              headers: { Authorization: `Bearer ${token}` }
+            };
+        }
         const response = await axios.put('/api/portfolio', portfolioData, headers);
         setAssets(response.data.assets);
         setIncomes(response.data.incomes);
@@ -135,13 +137,15 @@ function MainContent({ isGuest }) {
   };
 
   const handleSaveTaxInfo = async (taxData) => {
-    if (!currentUser) return;
     setLoading(true);
     try {
-        const token = await currentUser.getIdToken(true);
-        const headers = {
-          headers: { Authorization: `Bearer ${token}` }
-        };
+        let headers = {};
+        if (!isGuest && currentUser) {
+            const token = await currentUser.getIdToken(true);
+            headers = {
+              headers: { Authorization: `Bearer ${token}` }
+            };
+        }
         const response = await axios.put('/api/user_tax_info', taxData, headers);
         setNetWorth(response.data.real_time_net_worth);
         setTaxLiability({

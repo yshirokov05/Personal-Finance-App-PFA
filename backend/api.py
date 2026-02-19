@@ -3,7 +3,7 @@ from flask_cors import CORS
 from price_service import get_current_price, validate_ticker
 from calculations import calculate_net_worth
 from models import User, Income, Asset, FilingStatus, USState, IncomeType, Debt, AssetType
-from firestore_db import get_user_data, save_user_data
+from firestore_db import get_user_data, save_user_data, get_db
 from auth import token_required
 
 app = Flask(__name__)
@@ -47,11 +47,7 @@ def debt_to_dict(debt):
 def get_net_worth():
     """Calculates and returns the current net worth."""
     if request.uid == "guest":
-        # Return empty/zero data for guests
-        user = User(filing_status=FilingStatus.SINGLE, state=USState.CA)
-        incomes = []
-        assets = []
-        debts = []
+        user, incomes, assets, debts = get_user_data(user_id="demo_user")
     else:
         user, incomes, assets, debts = get_user_data(user_id=request.uid)
     
@@ -69,10 +65,7 @@ def update_portfolio():
     """Updates the portfolio with validation for tickers and numbers."""
     data = request.get_json()
     if request.uid == "guest":
-        user = User(filing_status=FilingStatus.SINGLE, state=USState.CA)
-        incomes = []
-        assets = []
-        debts = []
+        user, incomes, assets, debts = get_user_data(user_id="demo_user")
     else:
         user, incomes, assets, debts = get_user_data(user_id=request.uid)
 
@@ -167,10 +160,7 @@ def update_portfolio():
 def update_user_tax_info():
     data = request.get_json()
     if request.uid == "guest":
-        user = User(filing_status=FilingStatus.SINGLE, state=USState.CA)
-        incomes = []
-        assets = []
-        debts = []
+        user, incomes, assets, debts = get_user_data(user_id="demo_user")
     else:
         user, incomes, assets, debts = get_user_data(user_id=request.uid)
     
@@ -202,4 +192,4 @@ def update_user_tax_info():
     return jsonify(net_worth_data)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

@@ -1,4 +1,3 @@
-
 FEDERAL_TAX_BRACKETS_2026 = {
     'single': {
         'deduction': 16100,
@@ -53,57 +52,137 @@ FEDERAL_TAX_BRACKETS_2026 = {
 FEDERAL_TAX_BRACKETS_2026['qualifying_widow'] = FEDERAL_TAX_BRACKETS_2026['married_filing_jointly']
 
 STATE_TAX_BRACKETS_2026 = {
+    'AL': {
+        'single': {'deduction': 2500, 'brackets': [{'rate': 0.02, 'up_to': 500}, {'rate': 0.04, 'up_to': 3000}, {'rate': 0.05, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 5000, 'brackets': [{'rate': 0.02, 'up_to': 1000}, {'rate': 0.04, 'up_to': 6000}, {'rate': 0.05, 'up_to': float('inf')}]}
+    },
+    'AK': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}},
+    'AZ': {
+        'single': {'deduction': 13850, 'brackets': [{'rate': 0.025, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.025, 'up_to': float('inf')}]}
+    },
+    'AR': {
+        'single': {'deduction': 2340, 'brackets': [{'rate': 0.02, 'up_to': 4300}, {'rate': 0.04, 'up_to': 8500}, {'rate': 0.044, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 4680, 'brackets': [{'rate': 0.02, 'up_to': 4300}, {'rate': 0.04, 'up_to': 8500}, {'rate': 0.044, 'up_to': float('inf')}]}
+    },
     'CA': {
         'single': {
-            'deduction': 5706,
+            'deduction': 5363, 
             'brackets': [
-                {'rate': 0.01, 'up_to': 11079},
-                {'rate': 0.02, 'up_to': 26264},
-                {'rate': 0.04, 'up_to': 41452},
-                {'rate': 0.06, 'up_to': 57542},
-                {'rate': 0.08, 'up_to': 72724},
-                {'rate': 0.093, 'up_to': 371479},
-                {'rate': 0.103, 'up_to': 445771},
-                {'rate': 0.113, 'up_to': 742953},
-                {'rate': 0.123, 'up_to': float('inf')}
+                {'rate': 0.01, 'up_to': 10412}, {'rate': 0.02, 'up_to': 24684}, {'rate': 0.04, 'up_to': 38959}, 
+                {'rate': 0.06, 'up_to': 54081}, {'rate': 0.08, 'up_to': 68350}, {'rate': 0.093, 'up_to': 349137}, 
+                {'rate': 0.103, 'up_to': 418961}, {'rate': 0.113, 'up_to': 698271}, {'rate': 0.123, 'up_to': float('inf')}
             ],
-            'mental_health_tax_rate': 0.01,
-            'mental_health_tax_threshold': 1000000
+            'mental_health_tax_rate': 0.01, 'mental_health_tax_threshold': 1000000
         },
         'married_filing_jointly': {
-            'deduction': 11412,
+            'deduction': 10726,
             'brackets': [
-                {'rate': 0.01, 'up_to': 22158},
-                {'rate': 0.02, 'up_to': 52528},
-                {'rate': 0.04, 'up_to': 82904},
-                {'rate': 0.06, 'up_to': 115084},
-                {'rate': 0.08, 'up_to': 145448},
-                {'rate': 0.093, 'up_to': 742958},
-                {'rate': 0.103, 'up_to': 891542},
-                {'rate': 0.113, 'up_to': 1485906},
-                {'rate': 0.123, 'up_to': float('inf')}
+                {'rate': 0.01, 'up_to': 20824}, {'rate': 0.02, 'up_to': 49368}, {'rate': 0.04, 'up_to': 77918}, 
+                {'rate': 0.06, 'up_to': 108162}, {'rate': 0.08, 'up_to': 136700}, {'rate': 0.093, 'up_to': 698274}, 
+                {'rate': 0.103, 'up_to': 837922}, {'rate': 0.113, 'up_to': 1396542}, {'rate': 0.123, 'up_to': float('inf')}
             ],
-            'mental_health_tax_rate': 0.01,
-            'mental_health_tax_threshold': 1000000
-        },
-        'head_of_household': {
-            'deduction': 8243,
-            'brackets': [
-                {'rate': 0.01, 'up_to': 22170},
-                {'rate': 0.02, 'up_to': 52530},
-                {'rate': 0.04, 'up_to': 67715},
-                {'rate': 0.06, 'up_to': 83808},
-                {'rate': 0.08, 'up_to': 98988},
-                {'rate': 0.093, 'up_to': 505199},
-                {'rate': 0.103, 'up_to': 606239},
-                {'rate': 0.113, 'up_to': 1000000}, # Actually continues
-                {'rate': 0.123, 'up_to': float('inf')}
-            ],
-            'mental_health_tax_rate': 0.01,
-            'mental_health_tax_threshold': 1000000
+            'mental_health_tax_rate': 0.01, 'mental_health_tax_threshold': 1000000
         }
-    }
+    },
+    'CO': {'single': {'deduction': 13850, 'brackets': [{'rate': 0.044, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.044, 'up_to': float('inf')}]}},
+    'CT': {
+        'single': {'deduction': 15000, 'brackets': [{'rate': 0.03, 'up_to': 10000}, {'rate': 0.05, 'up_to': 50000}, {'rate': 0.055, 'up_to': 100000}, {'rate': 0.06, 'up_to': 200000}, {'rate': 0.065, 'up_to': 250000}, {'rate': 0.069, 'up_to': 500000}, {'rate': 0.0699, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 24000, 'brackets': [{'rate': 0.03, 'up_to': 20000}, {'rate': 0.05, 'up_to': 100000}, {'rate': 0.055, 'up_to': 200000}, {'rate': 0.06, 'up_to': 400000}, {'rate': 0.065, 'up_to': 500000}, {'rate': 0.069, 'up_to': 1000000}, {'rate': 0.0699, 'up_to': float('inf')}]}
+    },
+    'DE': {
+        'single': {'deduction': 3250, 'brackets': [{'rate': 0, 'up_to': 2000}, {'rate': 0.022, 'up_to': 5000}, {'rate': 0.039, 'up_to': 10000}, {'rate': 0.048, 'up_to': 20000}, {'rate': 0.052, 'up_to': 25000}, {'rate': 0.0555, 'up_to': 60000}, {'rate': 0.066, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 6500, 'brackets': [{'rate': 0, 'up_to': 2000}, {'rate': 0.022, 'up_to': 5000}, {'rate': 0.039, 'up_to': 10000}, {'rate': 0.048, 'up_to': 20000}, {'rate': 0.052, 'up_to': 25000}, {'rate': 0.0555, 'up_to': 60000}, {'rate': 0.066, 'up_to': float('inf')}]}
+    },
+    'DC': {
+        'single': {'deduction': 13850, 'brackets': [{'rate': 0.04, 'up_to': 10000}, {'rate': 0.06, 'up_to': 40000}, {'rate': 0.065, 'up_to': 60000}, {'rate': 0.085, 'up_to': 250000}, {'rate': 0.0925, 'up_to': 500000}, {'rate': 0.0975, 'up_to': 1000000}, {'rate': 0.1075, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.04, 'up_to': 10000}, {'rate': 0.06, 'up_to': 40000}, {'rate': 0.065, 'up_to': 60000}, {'rate': 0.085, 'up_to': 250000}, {'rate': 0.0925, 'up_to': 500000}, {'rate': 0.0975, 'up_to': 1000000}, {'rate': 0.1075, 'up_to': float('inf')}]}
+    },
+    'FL': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}},
+    'GA': {'single': {'deduction': 12000, 'brackets': [{'rate': 0.0549, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 18500, 'brackets': [{'rate': 0.0549, 'up_to': float('inf')}]}},
+    'HI': {
+        'single': {'deduction': 2200, 'brackets': [{'rate': 0.014, 'up_to': 2400}, {'rate': 0.032, 'up_to': 4800}, {'rate': 0.055, 'up_to': 9600}, {'rate': 0.064, 'up_to': 14400}, {'rate': 0.068, 'up_to': 19200}, {'rate': 0.072, 'up_to': 24000}, {'rate': 0.076, 'up_to': 36000}, {'rate': 0.079, 'up_to': 48000}, {'rate': 0.0825, 'up_to': 150000}, {'rate': 0.09, 'up_to': 175000}, {'rate': 0.10, 'up_to': 200000}, {'rate': 0.11, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 4400, 'brackets': [{'rate': 0.014, 'up_to': 4800}, {'rate': 0.032, 'up_to': 9600}, {'rate': 0.055, 'up_to': 19200}, {'rate': 0.064, 'up_to': 28800}, {'rate': 0.068, 'up_to': 38400}, {'rate': 0.072, 'up_to': 48000}, {'rate': 0.076, 'up_to': 72000}, {'rate': 0.079, 'up_to': 96000}, {'rate': 0.0825, 'up_to': 300000}, {'rate': 0.09, 'up_to': 350000}, {'rate': 0.10, 'up_to': 400000}, {'rate': 0.11, 'up_to': float('inf')}]}
+    },
+    'ID': {'single': {'deduction': 13850, 'brackets': [{'rate': 0.058, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.058, 'up_to': float('inf')}]}},
+    'IL': {'single': {'deduction': 2775, 'brackets': [{'rate': 0.0495, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 5550, 'brackets': [{'rate': 0.0495, 'up_to': float('inf')}]}},
+    'IN': {'single': {'deduction': 1000, 'brackets': [{'rate': 0.0305, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 2000, 'brackets': [{'rate': 0.0305, 'up_to': float('inf')}]}},
+    'IA': {'single': {'deduction': 13850, 'brackets': [{'rate': 0.057, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.057, 'up_to': float('inf')}]}},
+    'KS': {
+        'single': {'deduction': 3500, 'brackets': [{'rate': 0.031, 'up_to': 15000}, {'rate': 0.0525, 'up_to': 30000}, {'rate': 0.057, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 8000, 'brackets': [{'rate': 0.031, 'up_to': 30000}, {'rate': 0.0525, 'up_to': 60000}, {'rate': 0.057, 'up_to': float('inf')}]}
+    },
+    'KY': {'single': {'deduction': 2980, 'brackets': [{'rate': 0.04, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 2980, 'brackets': [{'rate': 0.04, 'up_to': float('inf')}]}},
+    'LA': {
+        'single': {'deduction': 4500, 'brackets': [{'rate': 0.0185, 'up_to': 12500}, {'rate': 0.035, 'up_to': 50000}, {'rate': 0.0425, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 9000, 'brackets': [{'rate': 0.0185, 'up_to': 25000}, {'rate': 0.035, 'up_to': 100000}, {'rate': 0.0425, 'up_to': float('inf')}]}
+    },
+    'ME': {
+        'single': {'deduction': 13850, 'brackets': [{'rate': 0.058, 'up_to': 26050}, {'rate': 0.0675, 'up_to': 61600}, {'rate': 0.0715, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.058, 'up_to': 52100}, {'rate': 0.0675, 'up_to': 123250}, {'rate': 0.0715, 'up_to': float('inf')}]}
+    },
+    'MD': {
+        'single': {'deduction': 2550, 'brackets': [{'rate': 0.02, 'up_to': 1000}, {'rate': 0.03, 'up_to': 2000}, {'rate': 0.04, 'up_to': 3000}, {'rate': 0.0475, 'up_to': 100000}, {'rate': 0.05, 'up_to': 125000}, {'rate': 0.0525, 'up_to': 150000}, {'rate': 0.055, 'up_to': 250000}, {'rate': 0.0575, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 5100, 'brackets': [{'rate': 0.02, 'up_to': 1000}, {'rate': 0.03, 'up_to': 2000}, {'rate': 0.04, 'up_to': 3000}, {'rate': 0.0475, 'up_to': 150000}, {'rate': 0.05, 'up_to': 175000}, {'rate': 0.0525, 'up_to': 225000}, {'rate': 0.055, 'up_to': 300000}, {'rate': 0.0575, 'up_to': float('inf')}]}
+    },
+    'MA': {'single': {'deduction': 4400, 'brackets': [{'rate': 0.05, 'up_to': 1000000}, {'rate': 0.09, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 8800, 'brackets': [{'rate': 0.05, 'up_to': 1000000}, {'rate': 0.09, 'up_to': float('inf')}]}},
+    'MI': {'single': {'deduction': 5600, 'brackets': [{'rate': 0.0425, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 11200, 'brackets': [{'rate': 0.0425, 'up_to': float('inf')}]}},
+    'MN': {
+        'single': {'deduction': 13825, 'brackets': [{'rate': 0.0535, 'up_to': 30070}, {'rate': 0.068, 'up_to': 98760}, {'rate': 0.0785, 'up_to': 183340}, {'rate': 0.0985, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 27650, 'brackets': [{'rate': 0.0535, 'up_to': 43960}, {'rate': 0.068, 'up_to': 174610}, {'rate': 0.0785, 'up_to': 304970}, {'rate': 0.0985, 'up_to': float('inf')}]}
+    },
+    'MS': {'single': {'deduction': 2300, 'brackets': [{'rate': 0.047, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 4600, 'brackets': [{'rate': 0.047, 'up_to': float('inf')}]}},
+    'MO': {'single': {'deduction': 13850, 'brackets': [{'rate': 0.015, 'up_to': 1273}, {'rate': 0.0495, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.015, 'up_to': 1273}, {'rate': 0.0495, 'up_to': float('inf')}]}},
+    'MT': {'single': {'deduction': 13850, 'brackets': [{'rate': 0.047, 'up_to': 20500}, {'rate': 0.059, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.047, 'up_to': 41000}, {'rate': 0.059, 'up_to': float('inf')}]}},
+    'NE': {'single': {'deduction': 7900, 'brackets': [{'rate': 0.0246, 'up_to': 3700}, {'rate': 0.0351, 'up_to': 22130}, {'rate': 0.0501, 'up_to': 35730}, {'rate': 0.0584, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 15800, 'brackets': [{'rate': 0.0246, 'up_to': 7400}, {'rate': 0.0351, 'up_to': 44260}, {'rate': 0.0501, 'up_to': 71460}, {'rate': 0.0584, 'up_to': float('inf')}]}},
+    'NV': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}},
+    'NH': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}},
+    'NJ': {
+        'single': {'deduction': 0, 'brackets': [{'rate': 0.014, 'up_to': 20000}, {'rate': 0.0175, 'up_to': 35000}, {'rate': 0.035, 'up_to': 40000}, {'rate': 0.05525, 'up_to': 75000}, {'rate': 0.0637, 'up_to': 500000}, {'rate': 0.0897, 'up_to': 1000000}, {'rate': 0.1075, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0.014, 'up_to': 20000}, {'rate': 0.0175, 'up_to': 50000}, {'rate': 0.0245, 'up_to': 70000}, {'rate': 0.035, 'up_to': 80000}, {'rate': 0.05525, 'up_to': 150000}, {'rate': 0.0637, 'up_to': 500000}, {'rate': 0.0897, 'up_to': 1000000}, {'rate': 0.1075, 'up_to': float('inf')}]}
+    },
+    'NM': {
+        'single': {'deduction': 13850, 'brackets': [{'rate': 0.017, 'up_to': 5500}, {'rate': 0.032, 'up_to': 11000}, {'rate': 0.047, 'up_to': 16000}, {'rate': 0.049, 'up_to': 210000}, {'rate': 0.059, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.017, 'up_to': 8000}, {'rate': 0.032, 'up_to': 16000}, {'rate': 0.047, 'up_to': 24000}, {'rate': 0.049, 'up_to': 315000}, {'rate': 0.059, 'up_to': float('inf')}]}
+    },
+    'NY': {
+        'single': {'deduction': 8000, 'brackets': [{'rate': 0.04, 'up_to': 8500}, {'rate': 0.045, 'up_to': 11700}, {'rate': 0.0525, 'up_to': 13900}, {'rate': 0.055, 'up_to': 21400}, {'rate': 0.0585, 'up_to': 80650}, {'rate': 0.0625, 'up_to': 215400}, {'rate': 0.0685, 'up_to': 1077550}, {'rate': 0.0965, 'up_to': 5000000}, {'rate': 0.103, 'up_to': 25000000}, {'rate': 0.109, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 16050, 'brackets': [{'rate': 0.04, 'up_to': 17150}, {'rate': 0.045, 'up_to': 23600}, {'rate': 0.0525, 'up_to': 27900}, {'rate': 0.055, 'up_to': 43000}, {'rate': 0.0585, 'up_to': 161550}, {'rate': 0.0625, 'up_to': 323200}, {'rate': 0.0685, 'up_to': 2155350}, {'rate': 0.0965, 'up_to': 5000000}, {'rate': 0.103, 'up_to': 25000000}, {'rate': 0.109, 'up_to': float('inf')}]}
+    },
+    'NC': {'single': {'deduction': 12750, 'brackets': [{'rate': 0.045, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 25500, 'brackets': [{'rate': 0.045, 'up_to': float('inf')}]}},
+    'ND': {'single': {'deduction': 13850, 'brackets': [{'rate': 0.011, 'up_to': 44725}, {'rate': 0.0204, 'up_to': 108200}, {'rate': 0.0227, 'up_to': 225950}, {'rate': 0.0264, 'up_to': 491350}, {'rate': 0.029, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0.011, 'up_to': 74750}, {'rate': 0.0204, 'up_to': 180800}, {'rate': 0.0227, 'up_to': 275550}, {'rate': 0.0264, 'up_to': 491350}, {'rate': 0.029, 'up_to': float('inf')}]}},
+    'OH': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': 26050}, {'rate': 0.0275, 'up_to': 100000}, {'rate': 0.035, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': 26050}, {'rate': 0.0275, 'up_to': 100000}, {'rate': 0.035, 'up_to': float('inf')}]}},
+    'OK': {'single': {'deduction': 6350, 'brackets': [{'rate': 0.0025, 'up_to': 1000}, {'rate': 0.0075, 'up_to': 2500}, {'rate': 0.0175, 'up_to': 3750}, {'rate': 0.0275, 'up_to': 4900}, {'rate': 0.0375, 'up_to': 7200}, {'rate': 0.0475, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 12700, 'brackets': [{'rate': 0.0025, 'up_to': 2000}, {'rate': 0.0075, 'up_to': 5000}, {'rate': 0.0175, 'up_to': 7500}, {'rate': 0.0275, 'up_to': 9800}, {'rate': 0.0375, 'up_to': 12200}, {'rate': 0.0475, 'up_to': float('inf')}]}},
+    'OR': {
+        'single': {'deduction': 2605, 'brackets': [{'rate': 0.0475, 'up_to': 4050}, {'rate': 0.0675, 'up_to': 10200}, {'rate': 0.0875, 'up_to': 125000}, {'rate': 0.099, 'up_to': float('inf')}]},
+        'married_filing_jointly': {'deduction': 5210, 'brackets': [{'rate': 0.0475, 'up_to': 8100}, {'rate': 0.0675, 'up_to': 20400}, {'rate': 0.0875, 'up_to': 250000}, {'rate': 0.099, 'up_to': float('inf')}]}
+    },
+    'PA': {'single': {'deduction': 0, 'brackets': [{'rate': 0.0307, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0.0307, 'up_to': float('inf')}]}},
+    'RI': {'single': {'deduction': 10025, 'brackets': [{'rate': 0.0375, 'up_to': 74150}, {'rate': 0.0475, 'up_to': 168600}, {'rate': 0.0599, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 20050, 'brackets': [{'rate': 0.0375, 'up_to': 74150}, {'rate': 0.0475, 'up_to': 168600}, {'rate': 0.0599, 'up_to': float('inf')}]}},
+    'SC': {'single': {'deduction': 13850, 'brackets': [{'rate': 0, 'up_to': 3460}, {'rate': 0.03, 'up_to': 17330}, {'rate': 0.064, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 27700, 'brackets': [{'rate': 0, 'up_to': 3460}, {'rate': 0.03, 'up_to': 17330}, {'rate': 0.064, 'up_to': float('inf')}]}},
+    'SD': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}},
+    'TN': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}},
+    'TX': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}},
+    'UT': {'single': {'deduction': 0, 'brackets': [{'rate': 0.0465, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0.0465, 'up_to': float('inf')}]}},
+    'VT': {'single': {'deduction': 6850, 'brackets': [{'rate': 0.0335, 'up_to': 43900}, {'rate': 0.066, 'up_to': 106550}, {'rate': 0.076, 'up_to': 222150}, {'rate': 0.0875, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 13700, 'brackets': [{'rate': 0.0335, 'up_to': 73350}, {'rate': 0.066, 'up_to': 177050}, {'rate': 0.076, 'up_to': 269750}, {'rate': 0.0875, 'up_to': float('inf')}]}},
+    'VA': {'single': {'deduction': 8000, 'brackets': [{'rate': 0.02, 'up_to': 3000}, {'rate': 0.03, 'up_to': 5000}, {'rate': 0.05, 'up_to': 17000}, {'rate': 0.0575, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 16000, 'brackets': [{'rate': 0.02, 'up_to': 3000}, {'rate': 0.03, 'up_to': 5000}, {'rate': 0.05, 'up_to': 17000}, {'rate': 0.0575, 'up_to': float('inf')}]}},
+    'WA': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}},
+    'WV': {'single': {'deduction': 0, 'brackets': [{'rate': 0.0236, 'up_to': 10000}, {'rate': 0.0315, 'up_to': 25000}, {'rate': 0.0354, 'up_to': 40000}, {'rate': 0.0472, 'up_to': 60000}, {'rate': 0.0512, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0.0236, 'up_to': 20000}, {'rate': 0.0315, 'up_to': 50000}, {'rate': 0.0354, 'up_to': 80000}, {'rate': 0.0472, 'up_to': 120000}, {'rate': 0.0512, 'up_to': float('inf')}]}},
+    'WI': {'single': {'deduction': 11970, 'brackets': [{'rate': 0.035, 'up_to': 14320}, {'rate': 0.044, 'up_to': 28640}, {'rate': 0.053, 'up_to': 315310}, {'rate': 0.0765, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 23940, 'brackets': [{'rate': 0.035, 'up_to': 19090}, {'rate': 0.044, 'up_to': 38190}, {'rate': 0.053, 'up_to': 420420}, {'rate': 0.0765, 'up_to': float('inf')}]}},
+    'WY': {'single': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}, 'married_filing_jointly': {'deduction': 0, 'brackets': [{'rate': 0, 'up_to': float('inf')}]}}
 }
+
+# Apply fallbacks/copies for other status types for all states
+for state_code in STATE_TAX_BRACKETS_2026:
+    if 'married_filing_separately' not in STATE_TAX_BRACKETS_2026[state_code]:
+        STATE_TAX_BRACKETS_2026[state_code]['married_filing_separately'] = STATE_TAX_BRACKETS_2026[state_code]['single']
+    if 'head_of_household' not in STATE_TAX_BRACKETS_2026[state_code]:
+        # Usually similar to single but wider brackets, simplified to single for now
+        STATE_TAX_BRACKETS_2026[state_code]['head_of_household'] = STATE_TAX_BRACKETS_2026[state_code]['single']
+    if 'qualifying_widow' not in STATE_TAX_BRACKETS_2026[state_code]:
+        STATE_TAX_BRACKETS_2026[state_code]['qualifying_widow'] = STATE_TAX_BRACKETS_2026[state_code]['married_filing_jointly']
+
+# CA Specific Overrides for HOH/Separated if known distinct
 STATE_TAX_BRACKETS_2026['CA']['married_filing_separately'] = STATE_TAX_BRACKETS_2026['CA']['single']
 STATE_TAX_BRACKETS_2026['CA']['qualifying_widow'] = STATE_TAX_BRACKETS_2026['CA']['married_filing_jointly']
 
@@ -112,7 +191,6 @@ def calculate_federal_tax(income, filing_status='single'):
     Calculates the federal tax for a given income and filing status.
     """
     if filing_status not in FEDERAL_TAX_BRACKETS_2026:
-        # Fallback to single if status not found, or return 0
         status_brackets = FEDERAL_TAX_BRACKETS_2026.get('single')
     else:
         status_brackets = FEDERAL_TAX_BRACKETS_2026[filing_status]
@@ -143,11 +221,10 @@ def calculate_state_tax(income, state='CA', filing_status='single'):
     Calculates the state tax for a given income, state, and filing status.
     """
     if state not in STATE_TAX_BRACKETS_2026:
-        # Default to 0 for states not implemented or with no income tax
+        # Fallback to 0 if not found (should not happen with full list)
         return 0
     
     if filing_status not in STATE_TAX_BRACKETS_2026[state]:
-        # Fallback to single for the state
         state_brackets = STATE_TAX_BRACKETS_2026[state].get('single')
     else:
         state_brackets = STATE_TAX_BRACKETS_2026[state][filing_status]
@@ -171,7 +248,7 @@ def calculate_state_tax(income, state='CA', filing_status='single'):
             tax += (taxable_income - previous_bracket_limit) * rate
             break
 
-    # Apply mental health services tax (Specific to CA, but checking generic fields)
+    # Apply mental health services tax (Specific to CA)
     if 'mental_health_tax_threshold' in state_brackets and taxable_income > state_brackets['mental_health_tax_threshold']:
         tax += (taxable_income - state_brackets['mental_health_tax_threshold']) * state_brackets['mental_health_tax_rate']
             
@@ -180,11 +257,7 @@ def calculate_state_tax(income, state='CA', filing_status='single'):
 def calculate_fica_tax(income, filing_status='single'):
     """
     Calculates FICA taxes (Social Security and Medicare) for 2026.
-    Social Security: 6.2% up to $176,100.
-    Medicare: 1.45% on all income.
-    Additional Medicare: 0.9% above threshold.
     """
-    # 2026 Social Security cap estimated
     ss_cap = 176100
     ss_rate = 0.062
     ss_tax = min(income, ss_cap) * ss_rate
@@ -192,7 +265,6 @@ def calculate_fica_tax(income, filing_status='single'):
     medicare_rate = 0.0145
     medicare_tax = income * medicare_rate
 
-    # Additional Medicare tax
     add_medicare_rate = 0.009
     if filing_status == 'married_filing_jointly':
         threshold = 250000
@@ -204,8 +276,3 @@ def calculate_fica_tax(income, filing_status='single'):
     add_medicare_tax = max(0, income - threshold) * add_medicare_rate
 
     return ss_tax + medicare_tax + add_medicare_tax
-
-if __name__ == '__main__':
-    # Example usage:
-    # To be added later
-    pass

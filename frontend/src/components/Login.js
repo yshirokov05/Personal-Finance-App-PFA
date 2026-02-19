@@ -8,7 +8,18 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     
-    const { login, signup } = useAuth();
+    const { login, signup, loginWithGoogle } = useAuth();
+
+    async function handleGoogleLogin() {
+        setError('');
+        setLoading(true);
+        try {
+            await loginWithGoogle();
+        } catch (err) {
+            setError('Failed to log in with Google: ' + err.message);
+        }
+        setLoading(false);
+    }
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -88,6 +99,18 @@ const Login = () => {
                             <span className="px-2 bg-white text-gray-500">Or</span>
                         </div>
                     </div>
+
+                    <button 
+                        onClick={handleGoogleLogin}
+                        className="flex items-center justify-center w-full text-gray-700 bg-white border border-gray-300 py-2 rounded-md hover:bg-gray-50 font-medium"
+                    >
+                        <img 
+                            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
+                            alt="Google logo" 
+                            className="w-5 h-5 mr-2"
+                        />
+                        Sign in with Google
+                    </button>
 
                     <button 
                         onClick={() => window.dispatchEvent(new CustomEvent('continue-as-guest'))}

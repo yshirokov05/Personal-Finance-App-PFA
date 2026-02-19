@@ -2,31 +2,47 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from models import User, Income, Asset, Debt, FilingStatus, USState, IncomeType, AssetType
 
+import logging
+
 # We move the client creation inside a function so it doesn't slow down the boot-up
 def get_db():
     try:
-        firebase_admin.get_app()
+        # Check if the app is already initialized
+        app = firebase_admin.get_app()
     except ValueError:
-        firebase_admin.initialize_app()
-    return firestore.client()
+        # If not, initialize it
+        try:
+            # In production (Firebase Functions), this automatically uses the right credentials
+            app = firebase_admin.initialize_app()
+        except Exception as e:
+            logging.error(f"Failed to initialize Firebase: {e}")
+            return None
+    try:
+        return firestore.client()
+    except Exception as e:
+        logging.error(f"Failed to create Firestore client: {e}")
+        return None
 
 def get_user_data(user_id="default_user"):
     """Fetches user tax info, incomes, assets, and debts from Firestore."""
     db = get_db()
+    if db is None:
+        return (
+            User(filing_status=FilingStatus.SINGLE, state=USState.CA),
+            [],
+            [],
+            []
+        )
     user_ref = db.collection('users').document(user_id)
     doc = user_ref.get()
     
     if not doc.exists:
-        # Return default if not found
+        # Return empty state if not found (don't force demo data on new users)
         return (
             User(filing_status=FilingStatus.SINGLE, state=USState.CA),
-            [Income(income_type=IncomeType.SALARY, amount=120000, monthly_income=10000)],
-            [
-                Asset(ticker='QQQ', shares=100, cost_basis=30000, asset_type=AssetType.STOCK),
-                Asset(ticker='NVDA', shares=50, cost_basis=10000, asset_type=AssetType.STOCK),
-                Asset(ticker='CASH', shares=25000, cost_basis=1, asset_type=AssetType.CASH)
-            ],
-            [Debt(name='Student Loan', initial_amount=30000, amount_paid=10000, monthly_payment=500, interest_rate=0.05)]
+            [],
+            [],
+            []
         )
     
     data = doc.to_dict()
@@ -71,6 +87,9 @@ def get_user_data(user_id="default_user"):
 def save_user_data(user, incomes, assets, debts, user_id="default_user"):
     """Saves the entire state to Firestore."""
     db = get_db()
+    if db is None:
+        logging.warning("Skipping save to Firestore because the client is not initialized.")
+        return
     user_ref = db.collection('users').document(user_id)
     
     data = {

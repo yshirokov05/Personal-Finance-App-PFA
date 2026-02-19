@@ -1,10 +1,14 @@
 from firebase_admin import auth
 from flask import request, jsonify
 from functools import wraps
+from firestore_db import get_db
 
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        # Ensure Firebase is initialized
+        get_db()
+        
         # Handle CORS preflight requests
         if request.method == 'OPTIONS':
             return f(*args, **kwargs)
