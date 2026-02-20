@@ -1,10 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, Wallet, CreditCard, PiggyBank, Settings, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Wallet, CreditCard, PiggyBank, Settings, DollarSign, Shield } from 'lucide-react';
 
 const Layout = ({ children, activeView, setActiveView }) => {
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
         { id: 'income', label: 'Income', icon: <Wallet size={20} /> },
+        { id: 'insurance', label: 'Insurance', icon: <Shield size={20} /> },
         { id: 'investments', label: 'Investments', icon: <PiggyBank size={20} /> },
         { id: 'debts', label: 'Debts', icon: <CreditCard size={20} /> },
         { id: 'taxes', label: 'Taxes', icon: <DollarSign size={20} /> },

@@ -1,30 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, Briefcase, DollarSign } from 'lucide-react';
+import { PlusCircle, Trash2, Briefcase, DollarSign, Shield } from 'lucide-react';
 
-const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes, debts: initialDebts, retirementAccounts: initialRetirementAccounts, initialTab }) => {
+const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes, debts: initialDebts, retirementAccounts: initialRetirementAccounts, insurances: initialInsurances, initialTab }) => {
     const [activeTab, setActiveTab] = useState(initialTab || 'income');
     const [assets, setAssets] = useState([]);
     const [incomes, setIncomes] = useState([]);
     const [debts, setDebts] = useState([]);
     const [retirementAccounts, setRetirementAccounts] = useState([]);
+    const [insurances, setInsurances] = useState([]);
     
     // For Income Tab
     const [incomeYear, setIncomeYear] = useState(2026);
-
-    // For Retirement Tab
-    const [editingAccountAssets, setEditingAccountAssets] = useState(null); // ID of account being edited
 
     useEffect(() => {
         setAssets(initialAssets || []);
         const mappedIncomes = (initialIncomes || []).map(income => ({
             ...income,
             yearly_income: income.monthly_income ? income.monthly_income * 12 : (income.amount || 0),
-            year: income.year || 2026
+            year: income.year || 2026,
+            hourly_type: income.hourly_type || 'REPEATING'
         }));
         setIncomes(mappedIncomes);
         setDebts(initialDebts || []);
         setRetirementAccounts(initialRetirementAccounts || []);
-    }, [initialAssets, initialIncomes, initialDebts, initialRetirementAccounts]);
+        setInsurances(initialInsurances || []);
+    }, [initialAssets, initialIncomes, initialDebts, initialRetirementAccounts, initialInsurances]);
 
     useEffect(() => {
         if (initialTab) {
@@ -77,12 +77,12 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
         const updatedIncomes = [...incomes];
         const income = { ...updatedIncomes[index], [field]: value };
         
-        if (income.income_type === 'SALARY') {
-            if (field === 'monthly_income') {
-                income.yearly_income = value ? Number(value) * 12 : 0;
-            } else if (field === 'yearly_income') {
-                income.monthly_income = value ? Number(value) / 12 : 0;
-            }
+        if (income.income_type === 'ANNUAL_SALARY') {
+            income.yearly_income = value ? Number(value) : 0;
+            income.monthly_income = income.yearly_income / 12;
+        } else if (income.income_type === 'MONTHLY_SALARY') {
+            income.monthly_income = value ? Number(value) : 0;
+            income.yearly_income = income.monthly_income * 12;
         }
         
         updatedIncomes[index] = income;
@@ -91,11 +91,12 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
 
     const addIncome = (year) => {
         setIncomes([...incomes, { 
-            income_type: 'SALARY', 
+            income_type: 'ANNUAL_SALARY', 
             monthly_income: 0, 
             yearly_income: 0, 
             hourly_wage: 0, 
             hours_worked: 0,
+            hourly_type: 'REPEATING',
             year: year
         }]);
     };
@@ -132,7 +133,6 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
     };
 
     const addRetirementAccount = () => {
-        // Generate a temporary ID for new accounts to link assets immediately
         const tempId = `temp_${Date.now()}`;
         setRetirementAccounts([...retirementAccounts, { 
             id: tempId,
@@ -145,9 +145,23 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
 
     const removeRetirementAccount = (index) => {
         const accountId = retirementAccounts[index].id;
-        // Also remove assets linked to this account
         setAssets(assets.filter(a => a.retirement_account_id !== accountId));
         setRetirementAccounts(retirementAccounts.filter((_, i) => i !== index));
+    };
+
+    // --- INSURANCE LOGIC ---
+    const handleInsuranceChange = (index, field, value) => {
+        const updatedInsurances = [...insurances];
+        updatedInsurances[index] = { ...updatedInsurances[index], [field]: value };
+        setInsurances(updatedInsurances);
+    };
+
+    const addInsurance = () => {
+        setInsurances([...insurances, { name: '', amount: 0, frequency: 'MONTHLY' }]);
+    };
+
+    const removeInsurance = (index) => {
+        setInsurances(insurances.filter((_, i) => i !== index));
     };
 
     // --- SAVE ---
@@ -164,7 +178,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                 yearly_income: Number(income.yearly_income || 0),
                 hourly_wage: Number(income.hourly_wage),
                 hours_worked: Number(income.hours_worked),
-                year: Number(income.year)
+                year: Number(income.year),
+                hourly_type: income.hourly_type
             })),
             debts: debts.map(debt => ({
                 ...debt,
@@ -177,12 +192,17 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                 ...ra,
                 contributions_2025: Number(ra.contributions_2025),
                 contributions_2026: Number(ra.contributions_2026)
+            })),
+            insurances: insurances.map(ins => ({
+                ...ins,
+                amount: Number(ins.amount)
             }))
         });
     };
 
     const tabs = [
         { id: 'income', label: 'Income' },
+        { id: 'insurance', label: 'Insurance' },
         { id: 'retirement', label: 'Retirement' },
         { id: 'investments', label: 'Taxable Assets' },
         { id: 'debts', label: 'Debts' },
@@ -209,7 +229,7 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                 </nav>
             </div>
 
-            <div className="mt-4 min-h-[300px]">
+            <div className="mt-4 min-h-[400px]">
                 {activeTab === 'income' && (
                     <div>
                         <div className="flex space-x-4 mb-4">
@@ -230,75 +250,167 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                         <h3 className="text-lg font-medium text-gray-900 mb-2">Incomes for {incomeYear}</h3>
                         <div className="space-y-4">
                             {getIncomesForYear(incomeYear).map((income) => (
-                                <div key={income.originalIndex} className="grid grid-cols-5 gap-2 items-end border-b pb-4">
-                                    <div className="col-span-1">
-                                        <label className="block text-xs font-medium text-gray-500 mb-1">Type</label>
-                                        <select
-                                            value={income.income_type}
-                                            onChange={(e) => handleIncomeChange(income.originalIndex, 'income_type', e.target.value)}
-                                            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                        >
-                                            <option value="SALARY">Salary</option>
-                                            <option value="HOURLY">Hourly</option>
-                                        </select>
+                                <div key={income.originalIndex} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="w-48">
+                                            <label className="block text-xs font-medium text-gray-500 mb-1">Income Type</label>
+                                            <select
+                                                value={income.income_type}
+                                                onChange={(e) => handleIncomeChange(income.originalIndex, 'income_type', e.target.value)}
+                                                className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                            >
+                                                <option value="ANNUAL_SALARY">Annual Salary</option>
+                                                <option value="MONTHLY_SALARY">Monthly Salary</option>
+                                                <option value="HOURLY">Hourly Wage</option>
+                                            </select>
+                                        </div>
+                                        <button onClick={() => removeIncome(income.originalIndex)} className="text-red-500 hover:text-red-700">
+                                            <Trash2 size={20} />
+                                        </button>
                                     </div>
 
-                                    {income.income_type === 'SALARY' ? (
-                                        <>
-                                            <div className="col-span-1">
-                                                <label className="block text-xs font-medium text-gray-500 mb-1">Monthly Salary</label>
+                                    {income.income_type === 'ANNUAL_SALARY' && (
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-500 mb-1">Yearly Amount</label>
                                                 <input
                                                     type="number"
-                                                    placeholder="Monthly"
-                                                    value={income.monthly_income}
-                                                    onChange={(e) => handleIncomeChange(income.originalIndex, 'monthly_income', e.target.value)}
-                                                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                />
-                                            </div>
-                                            <div className="col-span-2">
-                                                <label className="block text-xs font-medium text-gray-500 mb-1">Yearly Salary (Calculated)</label>
-                                                <input
-                                                    type="number"
-                                                    placeholder="Yearly"
-                                                    value={income.yearly_income}
+                                                    placeholder="0"
+                                                    value={income.yearly_income === 0 ? '' : income.yearly_income}
                                                     onChange={(e) => handleIncomeChange(income.originalIndex, 'yearly_income', e.target.value)}
-                                                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm font-semibold text-indigo-700"
+                                                    className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm font-bold text-indigo-700"
                                                 />
                                             </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="col-span-1">
-                                                <label className="block text-xs font-medium text-gray-500 mb-1">Hourly Wage</label>
-                                                <input
-                                                    type="number"
-                                                    placeholder="Wage"
-                                                    value={income.hourly_wage}
-                                                    onChange={(e) => handleIncomeChange(income.originalIndex, 'hourly_wage', e.target.value)}
-                                                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                />
+                                            <div className="flex items-end pb-2">
+                                                <p className="text-sm text-gray-500">Monthly: <span className="font-semibold">${(income.monthly_income || 0).toLocaleString()}</span></p>
                                             </div>
-                                            <div className="col-span-2">
-                                                <label className="block text-xs font-medium text-gray-500 mb-1">Hours Per Week</label>
-                                                <input
-                                                    type="number"
-                                                    placeholder="Hours"
-                                                    value={income.hours_worked}
-                                                    onChange={(e) => handleIncomeChange(income.originalIndex, 'hours_worked', e.target.value)}
-                                                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                                />
-                                            </div>
-                                        </>
+                                        </div>
                                     )}
-                                    <button onClick={() => removeIncome(income.originalIndex)} className="col-span-1 text-red-500 hover:text-red-700 justify-self-center mb-2">
-                                        <Trash2 size={20} />
-                                    </button>
+
+                                    {income.income_type === 'MONTHLY_SALARY' && (
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-500 mb-1">Monthly Amount</label>
+                                                <input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    value={income.monthly_income === 0 ? '' : income.monthly_income}
+                                                    onChange={(e) => handleIncomeChange(income.originalIndex, 'monthly_income', e.target.value)}
+                                                    className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm font-bold text-indigo-700"
+                                                />
+                                            </div>
+                                            <div className="flex items-end pb-2">
+                                                <p className="text-sm text-gray-500">Yearly: <span className="font-semibold">${(income.yearly_income || 0).toLocaleString()}</span></p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {income.income_type === 'HOURLY' && (
+                                        <div className="space-y-4">
+                                            <div className="flex space-x-4">
+                                                <div className="w-1/2">
+                                                    <label className="block text-xs font-medium text-gray-500 mb-1">Hourly Type</label>
+                                                    <div className="flex bg-white rounded-md border border-gray-300 p-1">
+                                                        <button 
+                                                            onClick={() => handleIncomeChange(income.originalIndex, 'hourly_type', 'REPEATING')}
+                                                            className={`flex-1 py-1 text-xs rounded ${income.hourly_type === 'REPEATING' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                                                        >
+                                                            Repeating
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleIncomeChange(income.originalIndex, 'hourly_type', 'ONE_TIME')}
+                                                            className={`flex-1 py-1 text-xs rounded ${income.hourly_type === 'ONE_TIME' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                                                        >
+                                                            One-time
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-500 mb-1">Wage</label>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="0"
+                                                        value={income.hourly_wage === 0 ? '' : income.hourly_wage}
+                                                        onChange={(e) => handleIncomeChange(income.originalIndex, 'hourly_wage', e.target.value)}
+                                                        className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-gray-500 mb-1">{income.hourly_type === 'REPEATING' ? 'Hours / Week' : 'Total Hours'}</label>
+                                                    <input
+                                                        type="number"
+                                                        placeholder="0"
+                                                        value={income.hours_worked === 0 ? '' : income.hours_worked}
+                                                        onChange={(e) => handleIncomeChange(income.originalIndex, 'hours_worked', e.target.value)}
+                                                        className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                                    />
+                                                </div>
+                                                <div className="flex items-end pb-2">
+                                                    <p className="text-sm font-semibold text-gray-700">Total: ${((income.hourly_wage || 0) * (income.hours_worked || 0) * (income.hourly_type === 'REPEATING' ? 52 : 1)).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
                         <button onClick={() => addIncome(incomeYear)} className="flex items-center text-blue-500 hover:text-blue-700 mt-4">
                             <PlusCircle size={20} className="mr-2" />
                             Add Income for {incomeYear}
+                        </button>
+                    </div>
+                )}
+
+                {activeTab === 'insurance' && (
+                    <div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Insurance Costs</h3>
+                        <p className="text-sm text-gray-500 mb-4">Add your various insurance premiums here. These costs are deducted from your gross income for tax estimation.</p>
+                        <div className="space-y-4">
+                            {insurances.map((ins, index) => (
+                                <div key={index} className="grid grid-cols-4 gap-2 items-end border-b pb-4">
+                                    <div className="col-span-1">
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Name (e.g. Car)</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Insurance Name"
+                                            value={ins.name}
+                                            onChange={(e) => handleInsuranceChange(index, 'name', e.target.value)}
+                                            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Amount</label>
+                                        <input
+                                            type="number"
+                                            placeholder="0"
+                                            value={ins.amount === 0 ? '' : ins.amount}
+                                            onChange={(e) => handleInsuranceChange(index, 'amount', e.target.value)}
+                                            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Frequency</label>
+                                        <select
+                                            value={ins.frequency}
+                                            onChange={(e) => handleInsuranceChange(index, 'frequency', e.target.value)}
+                                            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                        >
+                                            <option value="MONTHLY">Monthly</option>
+                                            <option value="EVERY_6_MONTHS">Every 6 Months</option>
+                                            <option value="YEARLY">Yearly</option>
+                                        </select>
+                                    </div>
+                                    <button onClick={() => removeInsurance(index)} className="col-span-1 text-red-500 hover:text-red-700 justify-self-center mb-2">
+                                        <Trash2 size={20} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <button onClick={addInsurance} className="flex items-center text-blue-500 hover:text-blue-700 mt-4">
+                            <PlusCircle size={20} className="mr-2" />
+                            Add Insurance
                         </button>
                     </div>
                 )}
@@ -345,7 +457,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                             <label className="block text-xs font-medium text-gray-500">2025 Contributions (Prior Year)</label>
                                             <input
                                                 type="number"
-                                                value={account.contributions_2025}
+                                                placeholder="0"
+                                                value={account.contributions_2025 === 0 ? '' : account.contributions_2025}
                                                 onChange={(e) => handleRetirementAccountChange(index, 'contributions_2025', e.target.value)}
                                                 className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
                                             />
@@ -354,7 +467,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                             <label className="block text-xs font-medium text-gray-500">2026 Contributions (Current Year)</label>
                                             <input
                                                 type="number"
-                                                value={account.contributions_2026}
+                                                placeholder="0"
+                                                value={account.contributions_2026 === 0 ? '' : account.contributions_2026}
                                                 onChange={(e) => handleRetirementAccountChange(index, 'contributions_2026', e.target.value)}
                                                 className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
                                             />
@@ -400,8 +514,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                                     <div className="col-span-1">
                                                         <input
                                                             type="number"
-                                                            placeholder="Shares"
-                                                            value={asset.shares}
+                                                            placeholder="0"
+                                                            value={asset.shares === 0 ? '' : asset.shares}
                                                             onChange={(e) => handleAssetChange(asset.originalIndex, 'shares', e.target.value)}
                                                             className="block w-full text-xs border-gray-300 rounded"
                                                         />
@@ -409,8 +523,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                                     <div className="col-span-1">
                                                         <input
                                                             type="number"
-                                                            placeholder="Price/Share"
-                                                            value={asset.cost_per_share || 0}
+                                                            placeholder="0"
+                                                            value={asset.cost_per_share === 0 ? '' : (asset.cost_per_share || 0)}
                                                             onChange={(e) => handleAssetChange(asset.originalIndex, 'cost_per_share', e.target.value)}
                                                             className="block w-full text-xs border-gray-300 rounded"
                                                         />
@@ -483,7 +597,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                                 <input
                                                     type="number"
                                                     min="0"
-                                                    value={asset.shares}
+                                                    placeholder="0"
+                                                    value={asset.shares === 0 ? '' : asset.shares}
                                                     onChange={(e) => handleAssetChange(asset.originalIndex, 'shares', Math.max(0, e.target.value))}
                                                     className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                                 />
@@ -493,7 +608,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                                 <input
                                                     type="number"
                                                     min="0"
-                                                    value={asset.cost_per_share || 0}
+                                                    placeholder="0"
+                                                    value={asset.cost_per_share === 0 ? '' : (asset.cost_per_share || 0)}
                                                     onChange={(e) => handleAssetChange(asset.originalIndex, 'cost_per_share', Math.max(0, e.target.value))}
                                                     className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                                 />
@@ -502,7 +618,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                                 <label className="block text-xs font-medium text-gray-500">Total Cost (Auto)</label>
                                                 <input
                                                     type="number"
-                                                    value={asset.cost_basis}
+                                                    placeholder="0"
+                                                    value={asset.cost_basis === 0 ? '' : asset.cost_basis}
                                                     readOnly
                                                     className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-md shadow-sm sm:text-sm cursor-not-allowed"
                                                 />
@@ -515,7 +632,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                             <input
                                                 type="number"
                                                 min="0"
-                                                value={asset.shares}
+                                                placeholder="0"
+                                                value={asset.shares === 0 ? '' : asset.shares}
                                                 onChange={(e) => handleAssetChange(asset.originalIndex, 'shares', Math.max(0, e.target.value))}
                                                 className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                             />
@@ -555,7 +673,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                             <label className="block text-xs font-medium text-gray-500">Total Loan Amount</label>
                                             <input
                                                 type="number"
-                                                value={debt.initial_amount}
+                                                placeholder="0"
+                                                value={debt.initial_amount === 0 ? '' : debt.initial_amount}
                                                 onChange={(e) => handleDebtChange(index, 'initial_amount', e.target.value)}
                                                 className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                             />
@@ -566,7 +685,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                             <label className="block text-xs font-medium text-gray-500">Amount Paid Already</label>
                                             <input
                                                 type="number"
-                                                value={debt.amount_paid}
+                                                placeholder="0"
+                                                value={debt.amount_paid === 0 ? '' : debt.amount_paid}
                                                 onChange={(e) => handleDebtChange(index, 'amount_paid', e.target.value)}
                                                 className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                             />
@@ -575,7 +695,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                             <label className="block text-xs font-medium text-gray-500">Monthly Payment</label>
                                             <input
                                                 type="number"
-                                                value={debt.monthly_payment}
+                                                placeholder="0"
+                                                value={debt.monthly_payment === 0 ? '' : debt.monthly_payment}
                                                 onChange={(e) => handleDebtChange(index, 'monthly_payment', e.target.value)}
                                                 className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                             />
@@ -584,7 +705,8 @@ const EditPortfolio = ({ onSave, assets: initialAssets, incomes: initialIncomes,
                                             <label className="block text-xs font-medium text-gray-500">Interest Rate %</label>
                                             <input
                                                 type="number"
-                                                value={debt.interest_rate}
+                                                placeholder="0"
+                                                value={debt.interest_rate === 0 ? '' : debt.interest_rate}
                                                 onChange={(e) => handleDebtChange(index, 'interest_rate', e.target.value)}
                                                 className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                             />

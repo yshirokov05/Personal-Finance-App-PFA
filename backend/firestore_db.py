@@ -1,6 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
-from models import User, Income, Asset, Debt, FilingStatus, USState, IncomeType, AssetType, RetirementAccount, AccountType
+from models import User, Income, Asset, Debt, FilingStatus, USState, IncomeType, AssetType, RetirementAccount, AccountType, Insurance, InsuranceFrequency, HourlyType
 import logging
 
 # We move the client creation inside a function so it doesn't slow down the boot-up
@@ -23,11 +23,12 @@ def get_db():
         return None
 
 def get_user_data(user_id="default_user"):
-    """Fetches user tax info, incomes, assets, debts, and retirement accounts from Firestore."""
+    """Fetches user tax info, incomes, assets, debts, retirement accounts, and insurances from Firestore."""
     db = get_db()
     if db is None:
         return (
             User(filing_status=FilingStatus.SINGLE, state=USState.CA),
+            [],
             [],
             [],
             [],
@@ -40,6 +41,7 @@ def get_user_data(user_id="default_user"):
         # Return empty state if not found (don't force demo data on new users)
         return (
             User(filing_status=FilingStatus.SINGLE, state=USState.CA),
+            [],
             [],
             [],
             [],
@@ -58,6 +60,7 @@ def get_user_data(user_id="default_user"):
     for inc in data.get('incomes', []):
         incomes.append(Income(
             income_type=IncomeType[inc['income_type']],
+            hourly_type=HourlyType[inc.get('hourly_type', 'REPEATING')],
             amount=inc['amount'],
             monthly_income=inc.get('monthly_income'),
             hourly_wage=inc.get('hourly_wage'),
@@ -96,10 +99,18 @@ def get_user_data(user_id="default_user"):
             contributions_2025=ra.get('contributions_2025', 0.0),
             contributions_2026=ra.get('contributions_2026', 0.0)
         ))
-        
-    return user, incomes, assets, debts, retirement_accounts
 
-def save_user_data(user, incomes, assets, debts, retirement_accounts, user_id="default_user"):
+    insurances = []
+    for ins in data.get('insurances', []):
+        insurances.append(Insurance(
+            name=ins['name'],
+            amount=ins['amount'],
+            frequency=InsuranceFrequency[ins['frequency']]
+        ))
+        
+    return user, incomes, assets, debts, retirement_accounts, insurances
+
+def save_user_data(user, incomes, assets, debts, retirement_accounts, insurances, user_id="default_user"):
     """Saves the entire state to Firestore."""
     db = get_db()
     if db is None:
@@ -112,6 +123,7 @@ def save_user_data(user, incomes, assets, debts, retirement_accounts, user_id="d
         'state': user.state.name,
         'incomes': [{
             'income_type': i.income_type.name,
+            'hourly_type': i.hourly_type.name if i.hourly_type else 'REPEATING',
             'amount': i.amount,
             'monthly_income': i.monthly_income,
             'hourly_wage': i.hourly_wage,
@@ -138,7 +150,12 @@ def save_user_data(user, incomes, assets, debts, retirement_accounts, user_id="d
             'account_type': r.account_type.name,
             'contributions_2025': r.contributions_2025,
             'contributions_2026': r.contributions_2026
-        } for r in retirement_accounts]
+        } for r in retirement_accounts],
+        'insurances': [{
+            'name': ins.name,
+            'amount': ins.amount,
+            'frequency': ins.frequency.name
+        } for ins in insurances]
     }
     
     user_ref.set(data)

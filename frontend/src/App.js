@@ -51,6 +51,7 @@ function MainContent({ isGuest, onResetGuest }) {
   const [incomes, setIncomes] = useState([]);
   const [debts, setDebts] = useState([]);
   const [retirementAccounts, setRetirementAccounts] = useState([]);
+  const [insurances, setInsurances] = useState([]);
   const [taxLiability, setTaxLiability] = useState({ 
     total: 0, 
     federal: 0, 
@@ -64,7 +65,6 @@ function MainContent({ isGuest, onResetGuest }) {
   const [modalTab, setModalTab] = useState('income');
 
   const fetchData = async () => {
-    // Both guest and authenticated users can fetch data
     try {
         let headers = {};
         if (!isGuest && currentUser) {
@@ -74,12 +74,12 @@ function MainContent({ isGuest, onResetGuest }) {
             };
         }
         
-        console.log("Fetching data...");
         const response = await axios.get('/api/net_worth', headers);
         setAssets(response.data.assets);
         setIncomes(response.data.incomes);
         setDebts(response.data.debts);
         setRetirementAccounts(response.data.retirement_accounts || []);
+        setInsurances(response.data.insurances || []);
         setNetWorth(response.data.real_time_net_worth);
         setTaxLiability({
             total: response.data.estimated_tax_liability,
@@ -117,6 +117,7 @@ function MainContent({ isGuest, onResetGuest }) {
         setIncomes(response.data.incomes);
         setDebts(response.data.debts);
         setRetirementAccounts(response.data.retirement_accounts || []);
+        setInsurances(response.data.insurances || []);
         setNetWorth(response.data.real_time_net_worth);
         setTaxLiability({
           total: response.data.estimated_tax_liability,
@@ -185,8 +186,7 @@ function MainContent({ isGuest, onResetGuest }) {
       case 'dashboard':
         return <Dashboard netWorth={netWorth} assets={assets} debts={debts} taxLiability={taxLiability} />;
       case 'income':
-        const totalAnnualIncomeForOverview = incomes.reduce((acc, inc) => acc + inc.amount, 0);
-        const totalMonthlyIncomeForOverview = totalAnnualIncomeForOverview / 12;
+        const totalAnnualIncomeForOverview = incomes.filter(inc => inc.year === 2026).reduce((acc, inc) => acc + inc.amount, 0);
         return (
           <div className="space-y-6">
             <h2 className="text-3xl font-bold text-gray-800">Income Overview</h2>
@@ -194,13 +194,43 @@ function MainContent({ isGuest, onResetGuest }) {
                <div className="flex justify-between items-center mb-6">
                   <div>
                     <p className="text-gray-600">Total Annual Gross Income: <span className="font-bold text-green-600">${totalAnnualIncomeForOverview.toLocaleString()}</span></p>
-                    <p className="text-gray-600">Total Monthly Gross Income: <span className="font-bold text-green-600">${totalMonthlyIncomeForOverview.toLocaleString()}</span></p>
                   </div>
                   <button onClick={() => openEditModal('income')} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Update Income</button>
                </div>
             </div>
           </div>
         );
+      case 'insurance':
+          const totalAnnualInsurance = insurances.reduce((acc, ins) => {
+              if (ins.frequency === 'MONTHLY') return acc + ins.amount * 12;
+              if (ins.frequency === 'EVERY_6_MONTHS') return acc + ins.amount * 2;
+              return acc + ins.amount; // YEARLY
+          }, 0);
+          return (
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold text-gray-800">Insurance & Protections</h2>
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                 <div className="flex justify-between items-center mb-6">
+                    <div>
+                      <p className="text-gray-600">Total Annual Insurance Costs: <span className="font-bold text-blue-600">${totalAnnualInsurance.toLocaleString()}</span></p>
+                    </div>
+                    <button onClick={() => openEditModal('insurance')} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Manage Insurance</button>
+                 </div>
+                 <div className="space-y-4">
+                     {insurances.map((ins, index) => (
+                         <div key={index} className="flex justify-between items-center p-4 border rounded-lg">
+                             <div>
+                                 <p className="font-semibold text-gray-800">{ins.name}</p>
+                                 <p className="text-sm text-gray-500">{ins.frequency.replace(/_/g, ' ').toLowerCase()}</p>
+                             </div>
+                             <p className="font-bold text-gray-900">${ins.amount.toLocaleString()}</p>
+                         </div>
+                     ))}
+                     {insurances.length === 0 && <p className="text-center text-gray-500 py-8">No insurance records found. Add some to track your protection costs.</p>}
+                 </div>
+              </div>
+            </div>
+          );
       case 'investments':
         return (
           <div className="space-y-6">
@@ -228,7 +258,7 @@ function MainContent({ isGuest, onResetGuest }) {
           </div>
         );
       case 'taxes':
-        const totalAnnualIncome = incomes.reduce((acc, inc) => acc + inc.amount, 0);
+        const totalAnnualIncome = incomes.filter(inc => inc.year === 2026).reduce((acc, inc) => acc + inc.amount, 0);
         return (
             <div className="space-y-6">
                 <h2 className="text-3xl font-bold text-gray-800">Tax Estimation</h2>
@@ -281,7 +311,15 @@ function MainContent({ isGuest, onResetGuest }) {
     <Layout activeView={activeView} setActiveView={setActiveView}>
       {renderContent()}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Edit Portfolio">
-        <EditPortfolio onSave={handleSave} assets={assets} incomes={incomes} debts={debts} retirementAccounts={retirementAccounts} initialTab={modalTab} /> 
+        <EditPortfolio 
+            onSave={handleSave} 
+            assets={assets} 
+            incomes={incomes} 
+            debts={debts} 
+            retirementAccounts={retirementAccounts} 
+            insurances={insurances}
+            initialTab={modalTab} 
+        /> 
       </Modal>
     </Layout>
   );

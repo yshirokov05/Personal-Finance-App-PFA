@@ -72,7 +72,17 @@ class User(Base):
 
 class IncomeType(enum.Enum):
     HOURLY = "hourly"
-    SALARY = "salary"
+    ANNUAL_SALARY = "annual_salary"
+    MONTHLY_SALARY = "monthly_salary"
+
+class HourlyType(enum.Enum):
+    REPEATING = "repeating"
+    ONE_TIME = "one_time"
+
+class InsuranceFrequency(enum.Enum):
+    MONTHLY = "monthly"
+    EVERY_6_MONTHS = "every_6_months"
+    YEARLY = "yearly"
 
 class AccountType(enum.Enum):
     ROTH_IRA = "roth_ira"
@@ -94,11 +104,20 @@ class Income(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, nullable=True)
     income_type = Column(Enum(IncomeType), nullable=False)
+    hourly_type = Column(Enum(HourlyType), nullable=True, default=HourlyType.REPEATING)
     amount = Column(Float, nullable=False)
     monthly_income = Column(Float, nullable=True)
     hourly_wage = Column(Float, nullable=True)
     hours_worked = Column(Float, nullable=True)
     year = Column(Integer, nullable=False, default=2026)
+
+class Insurance(Base):
+    __tablename__ = 'insurances'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, nullable=True)
+    name = Column(String, nullable=False)
+    amount = Column(Float, nullable=False)
+    frequency = Column(Enum(InsuranceFrequency), nullable=False, default=InsuranceFrequency.MONTHLY)
 
 class RetirementAccount(Base):
     __tablename__ = 'retirement_accounts'
