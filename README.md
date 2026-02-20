@@ -1,120 +1,94 @@
-# Personal Finance App (PFA)
+# Personal Finance App (PFA) - Net Worth Command Center
 
   ## 🎯 Project Overview
-  A web-based personal finance application designed for tracking variable income and manual asset    
-  growth.
-
-  ## 🎯 Project Goals
-
-Our vision is to build a comprehensive personal finance tool that empowers users to take control of their financial lives.
-
-**Short-term goals include:**
-- Predicting future net worth.
-- Tracking tax payments and savings.
-- Calculating real post-tax income.
-
-**Long-term goals include:**
-- Cross-platform availability (iOS, Android, Web).
-- Personalized financial guidance and strategies.
-- Seamless integration with brokerages, banks, and payroll services.
-
-For a detailed breakdown of our project roadmap, please see [PROJECT_GOALS.md](PROJECT_GOALS.md).
+  A comprehensive personal finance application designed to track variable income, manual asset growth, and live tax estimates. PFA provides a centralized dashboard for monitoring net worth, investment performance, and tax liabilities across all 50 US states.
 
   ## 👤 Solo Project
-  This is a solo development project focused on building a practical financial management tool.      
+  This project is a solo development effort focused on building a robust, privacy-first financial management tool with high-accuracy tax logic and real-time market integrations.
 
   ## 💰 Core Features
 
-  ### Variable Income Tracking
-  - **Hourly/Paycheck Income**: Track irregular income streams from hourly work or variable paychecks
-  - **Income History**: View and analyze income patterns over time
-  - **Income Forecasting**: Estimate future earnings based on historical data
+  ### 🏦 Dashboard & Net Worth Tracking
+  - **Live Asset Values**: Real-time stock and bond price tracking via `yfinance`.
+  - **Debt Management**: Track remaining balances, interest rates, and monthly payments.
+  - **Dynamic Portfolio**: Manage multiple asset types (IRA, 401k, Brokerage, Cash, Real Estate).
 
-  ### Manual Asset Management
-  - **IRA Tracking**: Monitor Individual Retirement Account balances and contributions
-  - **Stock Portfolio**: Track stock holdings and performance
-  - **Savings Accounts**: Manage multiple savings accounts and goals
+  ### 📈 Variable Income & Tax Estimation
+  - **Flexible Income Tracking**: Supports both hourly wages and annual salaries.
+  - **50-State Tax Engine**: Integrated federal and state tax calculations for all 50 US states (2026 tax year).
+  - **Tax Liability Estimation**: Breakdown of estimated Federal, State, and FICA taxes.
 
-  ### Asset Growth Monitoring
-  - Calculate net worth across all asset types
-  - Visualize asset growth over time
-  - Set and track financial goals
+  ### 🔐 Authentication & Data Privacy
+  - **Secure Login**: Firebase Authentication with Email/Password and Google Sign-In support.
+  - **Guest Mode**: Explore all features using a demo profile without an account.
+  - **Firestore Integration**: Persistent data storage for registered users with secure authorization.
 
   ## 🛠️ Tech Stack
-  - **Frontend**: React
-  - **Backend**: Firebase (Authentication, Firestore Database, Hosting), Python (SQLAlchemy, yfinance)
-  - **State Management**: React Context API / Redux (TBD)
-  - **UI Framework**: Material-UI / Tailwind CSS (TBD)
-
-  ## Backend Services
-
-### Prerequisites
-- Python 3.8+
-- pip
-
-### Installation
-```bash
-pip install -r requirements.txt
-```
-
-### Usage
-The backend services are currently designed as modules to be integrated into a larger application.
-- `backend/models.py`: Defines the database schema for User, Income, and Asset.
-- `backend/price_service.py`: Provides functions to fetch real-time stock prices.
-- `backend/calculations.py`: Contains logic to calculate net worth and estimated tax liability.
-
-To use these services, you would typically import them into your main backend application (e.g., a Flask or Django app) and interact with them via a database session. Example usage snippets are provided within each Python file.
-
-  ## Project Status
-  - [x] Project initialization
-  - [ ] Firebase configuration
-  - [ ] Authentication setup
-  - [ ] Database schema design
-  - [ ] Income tracking UI
-  - [ ] Asset management UI
-  - [ ] Dashboard with analytics
+  - **Frontend**: React (19.x), Tailwind CSS (3.x), Lucide-React, Recharts.
+  - **Backend**: Firebase Cloud Functions (Python 3.12 runtime), Firestore Database, Firebase Hosting.
+  - **APIs**: `yfinance` for real-time market data.
 
   ## 🚀 Getting Started
 
   ### Prerequisites
-  - Node.js (v14 or higher)
-  - npm or yarn
-  - Firebase account
+  - Node.js (v18 or higher)
+  - Firebase CLI
+  - Python 3.12 (for local backend development)
 
-  ### Installation
+  ### Frontend Installation
   ```bash
+  cd frontend
   npm install
-  ```
-
-  ### Development
-  ```bash
   npm start
   ```
 
-  ### Build
+  ### Backend Installation
   ```bash
-  npm run build
+  cd backend
+  python -m venv venv
+  source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+  pip install -r requirements.txt
   ```
 
-  ## 📦 Firebase Setup
-  1. Create a Firebase project at https://console.firebase.google.com
-  2. Enable Authentication (Email/Password)
-  3. Create a Firestore database
-  4. Add your Firebase config to `.env` file
+  ### Build & Deploy
+  ```bash
+  # Build frontend
+  cd frontend
+  npm run build
+
+  # Deploy everything to Firebase
+  firebase deploy
+  ```
+
+  ## 📦 Configuration
+  Create a `.env` file in the `frontend` directory with your Firebase project details:
+  ```env
+  REACT_APP_FIREBASE_API_KEY=your_api_key
+  REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+  REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+  REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+  REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+  REACT_APP_FIREBASE_APP_ID=your_app_id
+  ```
 
   ## 🗂️ Project Structure
   ```
-  /src
-    /components    # Reusable UI components
-    /pages        # Main application pages
-    /services     # Firebase and API services
-    /context      # React Context providers
-    /utils        # Helper functions
+  /backend
+    /api.py           # Flask-based API for Cloud Functions
+    /tax_logic.py     # 50-state tax calculation engine
+    /firestore_db.py  # Data persistence layer
+    /price_service.py # Market data integration
+  /frontend
+    /src
+      /components     # UI components (Dashboard, AssetTable, etc.)
+      /context        # AuthContext for state management
+      /firebase       # Firebase initialization
   ```
+
+  ## 🎯 Project Goals
+  For a detailed roadmap of completed features and future development, please see [PROJECT_GOALS.md](PROJECT_GOALS.md).
 
   ## 📝 License
   Personal project - All rights reserved
-
-  ## 🤖 Development Notes
   Initial setup completed with Claude Code automation.
-  
+  Current status: **Live & Deployed**

@@ -43,7 +43,7 @@ export class ErrorBoundary extends React.Component {
   }
 }
 
-function MainContent({ isGuest }) {
+function MainContent({ isGuest, onResetGuest }) {
   const { currentUser, logout } = useAuth();
   const [activeView, setActiveView] = useState('dashboard');
   const [netWorth, setNetWorth] = useState(0);
@@ -240,13 +240,27 @@ function MainContent({ isGuest }) {
               <div className="space-y-6">
                   <h2 className="text-3xl font-bold text-gray-800">Settings</h2>
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                      <p className="mb-4">Logged in as: <strong>{currentUser.email}</strong></p>
-                      <button 
-                        onClick={() => logout()}
-                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                      >
-                        Sign Out
-                      </button>
+                      {isGuest ? (
+                        <div className="space-y-4">
+                            <p className="text-lg text-gray-700 font-medium">To access settings, please make an account.</p>
+                            <button 
+                                onClick={onResetGuest}
+                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-semibold"
+                            >
+                                Create an Account
+                            </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                            <p className="text-gray-600 italic">Logged in as: <strong className="text-gray-900 not-italic">{currentUser?.email}</strong></p>
+                            <button 
+                                onClick={() => logout()}
+                                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                            >
+                                Sign Out
+                            </button>
+                        </div>
+                      )}
                   </div>
               </div>
           )
@@ -277,7 +291,11 @@ function App() {
 
     return (
         <ErrorBoundary>
-            {(currentUser || isGuest) ? <MainContent isGuest={isGuest} /> : <Login />}
+            {(currentUser || isGuest) ? (
+                <MainContent isGuest={isGuest} onResetGuest={() => setIsGuest(false)} />
+            ) : (
+                <Login />
+            )}
         </ErrorBoundary>
     );
 }
